@@ -74,14 +74,15 @@ Raw MRI data is not included in this repository due to privacy and licensing res
 ## Citation
 If you use this code, please cite our work:
 
-@article{zhang2025cssdiff,
+@article{zhang2025cyclic,
   title={Cyclic Self-Supervised Diffusion for Ultra Low-field to High-field MRI Synthesis},
-  author={Zhang, Zhenxuan and Jing, Peiyuan and Wang, Zi and Beitone, Coraline and others},,
+  author={Zhang, Zhenxuan and Jing, Peiyuan and Wang, Zi and Briski, Ula and Beitone, Coraline and Yang, Yue and Wu, Yinzhe and Wang, Fanwen and Yang, Liutao and Huang, Jiahao and others},
+  journal={arXiv preprint arXiv:2510.13735},
   year={2025}
 }
 
 ## Contact
-Zhenxuan Zhang — zhenxuan.zhang@imperial.ac.uk
+Zhenxuan Zhang — z.zhenxuan24@imperial.ac.uk
 
 Guang Yang — g.yang@imperial.ac.uk
 
