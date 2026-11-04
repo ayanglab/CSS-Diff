@@ -5,18 +5,11 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
-from .trans_unet import VisionTransformer
 #from .diffusion import DiffusionGenerator
 import torch.nn.functional as F
-from .trans_unet import CONFIGS as CONFIGS_ViT
-from . import residual_transformers
 # from . import ConvTransformer
-from .structured_trans_unet import StructuredVisionTransformer
-from . import unest
 import numpy as np
-from .PTNet import PTNet
 import functools
-from .syngan_unet import SynganUnetGenerator
 from .pss_generator import PSSGenerator
 ###############################################################################
 # Helper Functions
@@ -170,6 +163,7 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
     elif netG == 'unet_256':
         net = UnetGenerator(input_nc, output_nc, 8, ngf, norm_layer=norm_layer, use_dropout=use_dropout)
     elif netG == 'syngan_unet':
+        from .syngan_unet import SynganUnetGenerator
         net = SynganUnetGenerator(input_nc, output_nc, ngf=64, norm_layer=norm_layer, use_dropout=use_dropout)
     # elif netG == 'conv_transformer':
     #     net = ConvTransformer(
@@ -181,6 +175,8 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
     #         ngf=ngf
     #     )
     elif netG == 'utrans':
+        from .trans_unet import VisionTransformer
+        from .trans_unet import CONFIGS as CONFIGS_ViT
         config = CONFIGS_ViT['R50-ViT-B_16']
         config.transformer.num_layers = depth
         config.n_classes = output_nc
@@ -188,12 +184,15 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
         config.patches.grid = (img_size[0]//16, img_size[1]//16)
         net = VisionTransformer(config, img_size=img_size, zero_head=False, vis=False)
     elif netG == 'resvit':
+        from . import residual_transformers
         vit_name = 'R50-ViT-B_16'
         config = residual_transformers.CONFIGS[vit_name]
         config.img_size = img_size
         config.patches.grid = (img_size[0]//16, img_size[1]//16)
         net = residual_transformers.ResViT(config,input_dim = input_nc, img_size=img_size, output_dim=1, vis=False)
     elif netG in ['swin_b', 'swin_t']:
+        from .trans_unet import VisionTransformer
+        from .trans_unet import CONFIGS as CONFIGS_ViT
         if netG == 'swin_b':
             config = CONFIGS_ViT['Swin_v2_B']
         elif netG == 'swin_t':
@@ -204,6 +203,7 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
         # config.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         # net = VisionTransformer(config, img_size=config.img_size, transformer='swin')
     elif netG == 'ptnet':
+        from .PTNet import PTNet
         net = PTNet(img_size=img_size, depth=depth, down_ratio=[1, 4, 8, 16], channels=[1, 32, 64, 128])
     elif netG == 'esrgan':
         net = RRDBNet(
@@ -214,6 +214,7 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
             gc=32  # Growth channels (channels added in each dense layer)
         )
     elif netG == 'unest':
+        from . import unest
         if patch_size == 16:
             net = unest.UNEST(
                 in_channels=input_nc, img_size=img_size, out_channels=1, spatial_dims=2,
@@ -226,6 +227,8 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
             feature_size=feat_size, upsample=upsample, hidden_size=vit_emb_size, num_heads=heads)
 
     elif 'sf' in netG:
+        from .trans_unet import CONFIGS as CONFIGS_ViT
+        from .structured_trans_unet import StructuredVisionTransformer
         # if netG == 'sf_t':
         #     config = CONFIGS_ViT['SF-T_16']
         # elif netG == 'sf_b':

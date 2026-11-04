@@ -1,3 +1,4 @@
+from .auxiliary_weights import validate_auxiliary_weights, load_auxiliary_weights
 # This code is released under the CC BY-SA 4.0 license.
 
 import torch
@@ -43,6 +44,7 @@ class PSSLSCSGPModel(BaseModel):
         Parameters:
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
+        validate_auxiliary_weights(opt, ['SGP', 'LSC'])
         BaseModel.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'D_B', 'G_B', 'cycle_B', 'idt_B','ssim','L1']
@@ -68,7 +70,7 @@ class PSSLSCSGPModel(BaseModel):
         self.netG_A = PSSGenerator(config=opt.PSS, ckpt_path=None, device=opt.device).to(opt.device)
         self.netG_B = PSSGenerator(config=opt.PSS, ckpt_path=None, device=opt.device).to(opt.device)
         self.SGP =  CLIP(embed_dim = 512, image_resolution=120, vision_layers=6, vision_width=256, vision_patch_size=16).to(self.device)
-        self.SGP.load_state_dict(torch.load('/media/NAS07/USER_PATH/zzx/weight/clip_1.pth'),True)
+        load_auxiliary_weights(self.SGP, opt.sgp_weights, self.device, 'SGP')
         self.LSC = nets.UNet(
         spatial_dims=2,  # 2D UNet（如果是 3D MRI 就用 spatial_dims=3）
         in_channels=1,   # 输入通道数（灰度图 1，RGB 3）
@@ -76,7 +78,7 @@ class PSSLSCSGPModel(BaseModel):
         channels=(16, 32, 64, 128, 256),  # UNet 层通道数
         strides=(2, 2, 2, 2),  # 池化步长
         num_res_units=2 ).to(self.device)
-        self.LSC.load_state_dict(torch.load('/media/NAS07/USER_PATH/zzx/weight/unet_weights_rotate.pth', map_location=self.device), strict=True)
+        load_auxiliary_weights(self.LSC, opt.lsc_weights, self.device, 'LSC')
 
         if self.isTrain:  # define discriminators
             self.netD_A = networks.define_D(opt.output_nc, opt.ndf, opt.netD,

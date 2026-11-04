@@ -367,17 +367,18 @@ class Model(nn.Module):
         # Move entire model to device
         self.to(self.device)
     def forward(self, x, t, cond=None):
-        # Ensure all inputs are on self.device
-        x = x.to(self.device)
-        t = t.to(self.device)
+        device = self.conv_in.weight.device
+        # Follow module.to(device), including moves after construction.
+        x = x.to(device)
+        t = t.to(device)
         if cond is not None:
-            cond = cond.to(self.device)
+            cond = cond.to(device)
         
         x = torch.cat([x, cond], dim=1) if cond is not None else x
 
         # timestep embedding
         temb = get_timestep_embedding(t, self.ch)
-        temb = temb.to(self.device)
+        temb = temb.to(device)
         temb = self.temb.dense[0](temb)
         temb = nonlinearity(temb)
         temb = self.temb.dense[1](temb)

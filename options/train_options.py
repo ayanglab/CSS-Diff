@@ -33,8 +33,6 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--lambda_B', type=float, default=10.0, help='weight for cycle loss (B -> A -> B)')
         parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for cycle loss (B -> A -> B)')
         parser.add_argument('--lambda_seg', type=float, default=0.5, help='weight for segmentation loss')
-        parser.add_argument('--LSC_mask', type=float, default=0.2, help='mask ratio of LSC module')
-        parser.add_argument('--LSC_patch', type=float, default=24, help='num of patches used in LSC')
         parser.add_argument('--lambda_identity', type=float, default=0.5, help='use identity mapping.')
         parser.add_argument('--n_epochs', type=int, default=50, help='number of epochs with the initial learning rate')
         parser.add_argument('--n_epochs_decay', type=int, default=50, help='number of epochs to linearly decay learning rate to zero')
@@ -49,5 +47,6 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--position_based_range', type = int, default=3, help='Define the range for the position-based selection strategy (PBS). In percentage')
         parser.add_argument('--include_mask_val', action='store_true', default = False, help='Whether you want to observe mask generation in val set')
 
+        parser.add_argument('--sweep', action='store_true', help='Explicitly start a W&B sweep')
         self.isTrain = True
         return parser

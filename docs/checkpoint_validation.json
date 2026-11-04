@@ -1,0 +1,30 @@
+[
+  {
+    "module": "SGP",
+    "filename": "clip_1.pth",
+    "bytes": 39661016,
+    "sha256": "209c6bceeae88e4e6224025fc0b2cfdc2f2e447ed494638927c99c015fc60296",
+    "strict_load": "passed"
+  },
+  {
+    "module": "LSC",
+    "filename": "unet_weights_rotate.pth",
+    "bytes": 6531046,
+    "sha256": "7fbf42c970776450783dd373a6e6b0c3ebf326560d05dd1c8e1539a186fdd002",
+    "strict_load": "passed"
+  },
+  {
+    "module": "G_A",
+    "filename": "latest_net_G_A.pth",
+    "bytes": 309636466,
+    "sha256": "a842ac313a59bbbd3b31bd4abdd54a5774ff8e135e6767c3672b6272f9912ddb",
+    "strict_load": "passed"
+  },
+  {
+    "module": "G_B",
+    "filename": "latest_net_G_B.pth",
+    "bytes": 309636466,
+    "sha256": "2c97c1dbc617af9e4f9f25599caf37f1b3265d2ddf8c40536aa34c2bf21d87a0",
+    "strict_load": "passed"
+  }
+]

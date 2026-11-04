@@ -25,8 +25,12 @@ class BaseOptions:
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--device', type=str, default='cuda', help='cuda or cpu')
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
+        parser.add_argument('--sgp_weights', default='./weights/clip_1.pth', help='SGP raw state_dict checkpoint')
+        parser.add_argument('--lsc_weights', default='./weights/unet_weights_rotate.pth', help='LSC raw state_dict checkpoint')
+        parser.add_argument('--LSC_mask', type=float, default=0.2)
+        parser.add_argument('--LSC_patch', type=int, default=24)
         # model parameters
-        parser.add_argument('--model', type=str, default='cytran', help='chooses which model to use. [transformer_cvt | transformer | cycle_gan | pix2pix | test | colorization]')
+        parser.add_argument('--model', type=str, default='pss_lsc_sgp', help='chooses which model to use. [transformer_cvt | transformer | cycle_gan | pix2pix | test | colorization]')
         parser.add_argument('--input_nc', type=int, default=1, help='# of input image channels: 3 for RGB and 1 for grayscale')
         parser.add_argument('--output_nc', type=int, default=1, help='# of output image channels: 3 for RGB and 1 for grayscale')
         parser.add_argument('--ngf', type=int, default=64, help='# of gen filters in the last conv layer')
@@ -63,10 +67,15 @@ class BaseOptions:
         self.initialized = True
         return parser
     def load_yaml_options(self, yaml_path):
-        if not yaml_path or not os.path.isfile(yaml_path):
+        if not yaml_path:
             return {}
+        if not os.path.isfile(yaml_path):
+            raise FileNotFoundError('Configuration file not found: ' + yaml_path)
         with open(yaml_path, 'r') as f:
-            return yaml.safe_load(f)
+            result = yaml.safe_load(f)
+        if not isinstance(result, dict):
+            raise ValueError('Configuration must be a YAML mapping')
+        return result
         
     def gather_options(self):
         if not self.initialized:
@@ -93,8 +102,9 @@ class BaseOptions:
         model_option_setter = models.get_option_setter(model_name)
         parser = model_option_setter(parser, self.isTrain)
 
-        # === Step 6: Final parse ===
-        opt, _ = parser.parse_known_args()
+        # Model defaults must not override explicit YAML values. CLI wins last.
+        parser.set_defaults(**yaml_opts)
+        opt = parser.parse_args()
 
         self.parser = parser
         return opt
@@ -175,5 +185,6 @@ class BaseOptions:
         if len(opt.gpu_ids) > 0:
             torch.cuda.set_device(opt.gpu_ids[0])
 
+        opt.device = 'cuda:%d' % opt.gpu_ids[0] if opt.gpu_ids else 'cpu'
         self.opt = opt
         return self.opt

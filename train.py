@@ -23,28 +23,14 @@ sweep_configuration = {
         "structured_shape_iter": {"values": [0]}
 }}
 
-# Initialize sweep by passing in config
-sweep_id = wandb.sweep(sweep=sweep_configuration, project = "sweep-PSS-Diff")
-
-# if __name__ == '__main__':
-def main():
-    opt = TrainOptions().parse()   # get training options
-    if not opt.wdb_disabled: 
+def main(opt=None, sweep=False):
+    opt = TrainOptions().parse() if opt is None else copy.deepcopy(opt)
+    if not opt.wdb_disabled:
         wandb.init(project="PSS-Diff", name=opt.name)
-    
-    # Overwrite parameters with wandb
-    opt.fth = wandb.config.fth
-    opt.depth = wandb.config.depth
-    opt.n_layers_D = wandb.config.n_layers_D
-    opt.structured_shape_iter = wandb.config.structured_shape_iter
-
-    # Name for the experiment to save the checkpoints
-    exp_name = f"{opt.model}_{opt.netG}_fth{opt.fth}_depth{opt.depth}_nld{opt.n_layers_D}_ssi{opt.structured_shape_iter}"
-    exp_name = exp_name.replace(".","")
-    opt.name = exp_name
-    # import pprint
-    # pprint.pprint(vars(opt))
-
+    if sweep:
+        for key in sweep_configuration['parameters']:
+            setattr(opt, key, wandb.config[key])
+        opt.name = opt.name + '_' + wandb.run.id
 
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
     dataset_size = len(dataset)    # get the number of images in the dataset.
@@ -133,6 +119,16 @@ def main():
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
 
 
-# Initialize sweep by passing in config.
-wandb.agent(sweep_id,function = main)
+def run():
+    opt = TrainOptions().parse()
+    if opt.sweep:
+        if opt.wdb_disabled:
+            raise ValueError('--sweep cannot be combined with --wdb_disabled')
+        sweep_id = wandb.sweep(sweep=sweep_configuration, project='sweep-PSS-Diff')
+        wandb.agent(sweep_id, function=lambda: main(opt, sweep=True))
+    else:
+        main(opt)
 
+
+if __name__ == '__main__':
+    run()
