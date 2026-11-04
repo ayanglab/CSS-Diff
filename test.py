@@ -35,7 +35,6 @@ from util import html
 import glob
 import shutil
 import torch
-from models.structured_trans_model import StructuredTransModel
 import monai
 import numpy as np
 from util.util import tensor2im 
@@ -43,20 +42,8 @@ from PIL import Image
 import re
 import yaml
 
-opt = TestOptions().parse()
-
-# ===== 从命令行指定的 --config 里读取 =====
-if opt.config is not None:
-    with open(opt.config, "r") as f:
-        cfg = yaml.safe_load(f)
-
-    if "PSS" in cfg:
-        opt.PSS = cfg["PSS"]
-    else:
-        raise RuntimeError("Config file does not contain 'PSS' section")
-# ==========================================
-
 if __name__ == '__main__':
+    opt = TestOptions().parse()
     # opt = TestOptions().parse()  # get test options
     opt.num_threads = 0   # test code only supports num_threads = 1
     opt.batch_size = 1    # test code only supports batch_size = 1
@@ -95,9 +82,6 @@ if __name__ == '__main__':
     low_high_dir = os.path.join(web_dir, 'low_high')
     os.makedirs(low_high_dir, exist_ok=True)
 
-    if isinstance(model, StructuredTransModel):
-        model.gt_shape_assist = False
-        print(model)
 
     # Inspect dataset structure
     print("Inspecting dataset structure...")

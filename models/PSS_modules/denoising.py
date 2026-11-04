@@ -12,6 +12,13 @@ def compute_alpha(beta, t):
     return a
 
 def generalized_steps(x, seq, model, b, eta=0.0, cond=None):
+    seq = list(seq)
+    if not seq or any(not isinstance(t, int) or t < 0 or t >= len(b) for t in seq):
+        raise ValueError('seq must contain integer timesteps in [0, len(betas))')
+    if any(a >= c for a, c in zip(seq, seq[1:])):
+        raise ValueError('seq must be strictly increasing')
+    if not 0 <= eta <= 1:
+        raise ValueError('eta must be between zero and one')
     n = x.size(0)
     seq_next = [-1] + list(seq[:-1])
     x0_preds = []

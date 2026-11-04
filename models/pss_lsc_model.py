@@ -1,3 +1,4 @@
+from .auxiliary_weights import validate_auxiliary_weights, load_auxiliary_weights
 # This code is released under the CC BY-SA 4.0 license.
 
 import torch
@@ -43,6 +44,7 @@ class PSSLSCModel(BaseModel):
         Parameters:
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
+        validate_auxiliary_weights(opt, ['LSC'])
         BaseModel.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'D_B', 'G_B', 'cycle_B', 'idt_B','ssim','L1']
@@ -74,8 +76,7 @@ class PSSLSCModel(BaseModel):
         channels=(16, 32, 64, 128, 256),  # UNet 层通道数
         strides=(2, 2, 2, 2),  # 池化步长
         num_res_units=2 ).to(self.device)
-        # self.LSC.load_state_dict(torch.load('/media/NAS07/USER_PATH/zzx/weight/unet_weights_rotate.pth'),True)
-        self.LSC.load_state_dict(torch.load('/media/NAS07/USER_PATH/zzx/weight/unet_weights_rotate.pth', map_location=self.device), strict=True)
+        load_auxiliary_weights(self.LSC, opt.lsc_weights, self.device, 'LSC')
         if self.isTrain:  # define discriminators
             self.netD_A = networks.define_D(opt.output_nc, opt.ndf, opt.netD,
                                             opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)

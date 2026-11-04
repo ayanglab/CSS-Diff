@@ -26,37 +26,24 @@ class PSSGenerator(nn.Module):
                 state_dict = state_dict['model']
             self.model.load_state_dict(state_dict, strict=True)
 
-        self.betas = get_beta_schedule(
+        betas = get_beta_schedule(
             beta_schedule=self.config['diffusion']['beta_schedule'],
             beta_start=self.config['diffusion']['beta_start'],
             beta_end=self.config['diffusion']['beta_end'],
             num_diffusion_timesteps=self.config['diffusion']['num_diffusion_timesteps'],
         )
-        self.betas = torch.tensor(self.betas).float().to(self.device)
+        self.register_buffer('betas', torch.tensor(betas, dtype=torch.float32, device=self.device), persistent=False)
 
-    # def forward(self, x, seq=None, eta=0.0, trainable=True, cond=None):
-    #     if seq is None:
-    #         seq = list(range(0, self.config['diffusion']['num_diffusion_timesteps'], 10))
-    
-    #     if trainable:
-    #         xs, x0_preds = generalized_steps(
-    #             x, seq, self.model, self.betas, eta=eta, cond=cond
-    #         )
-    #     else:
-    #         with torch.no_grad():
-    #             xs, x0_preds = generalized_steps(
-    #                 x, seq, self.model, self.betas, eta=eta, cond=cond
-    #             )
-    #     return x0_preds[-1]
-    def forward(self, x, seq=None, eta=0.0, trainable=True, cond=None):
+    def forward(self, x, seq=None, eta=0.0, trainable=True, cond=None, return_trajectory=False):
         if seq is None:
             seq = list(range(0, self.config['diffusion']['num_diffusion_timesteps'], 10))
         
         # Ensure x and cond are on self.device
-        x = x.to(self.device)
+        x = x.to(self.betas.device)
         if cond is not None:
-            cond = cond.to(self.device)
+            cond = cond.to(self.betas.device)
         
+        seq = list(seq)
         if trainable:
             xs, x0_preds = generalized_steps(
                 x, seq, self.model, self.betas, eta=eta, cond=cond
@@ -66,6 +53,9 @@ class PSSGenerator(nn.Module):
                 xs, x0_preds = generalized_steps(
                     x, seq, self.model, self.betas, eta=eta, cond=cond
                 )
+        if return_trajectory:
+            return x0_preds[-1], {'states': xs, 'state_timesteps': list(reversed(seq)) + [-1],
+                                  'x0_predictions': x0_preds, 'prediction_timesteps': list(reversed(seq))}
         return x0_preds[-1]
 
     def q_sample(self, x0, t):

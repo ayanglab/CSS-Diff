@@ -1,7 +1,10 @@
 import os
 import re
 
-def rename_images(root_dir):
+def rename_images(root_dir, apply=False):
+    if not os.path.isdir(root_dir):
+        raise NotADirectoryError(root_dir)
+    operations = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
         # Skip if the directory doesn't end with 'A' or 'B'
         if not (dirpath.endswith("A") or dirpath.endswith("B")):
@@ -34,8 +37,17 @@ def rename_images(root_dir):
             dst_path = os.path.join(dirpath, new_name)
 
             print(f"Renaming: {fname} -> {new_name}")
-            os.rename(src_path, dst_path)
+            if os.path.exists(dst_path):
+                raise FileExistsError(dst_path)
+            operations.append((src_path, dst_path))
+    if apply:
+        for src, dst in operations:
+            os.rename(src, dst)
 
 if __name__ == "__main__":
-    root_directory = "/media/NAS07/USER_PATH/peiyuan/paired/images/T1"  # Change this to your root path
-    rename_images(root_directory)
+    import argparse
+    parser = argparse.ArgumentParser(description='Preview numeric MRI slice renaming; use --apply to rename.')
+    parser.add_argument('root_dir')
+    parser.add_argument('--apply', action='store_true')
+    args = parser.parse_args()
+    rename_images(args.root_dir, apply=args.apply)

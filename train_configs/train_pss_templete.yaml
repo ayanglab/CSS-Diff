@@ -1,19 +1,15 @@
-# config.yaml
 
-# ==== Common training settings ====
-dataroot: "/PATH/TO/DATA/paired_Monash_Leiden/images/Mix"
-name: "pss"
-checkpoints_dir: "/PATH/TO/CHECKPOINTS/pss"
+dataroot: "./datasets/mri"
+name: "css_diff"
+checkpoints_dir: "./checkpoints"
 gpu_ids: "0"
 
-# ==== Model & Dataset ====
-model: "pss"
+model: "pss_lsc_sgp"
 netG: "unest"
 dataset_mode: "aligned"
 input_nc: 1
 output_nc: 1
 
-# ==== Training settings ====
 phase: "train"
 lambda_L1: 100.0
 batch_size: 1
@@ -22,14 +18,12 @@ preprocess: "resize"
 n_epochs: 10
 n_epochs_decay: 10
 save_epoch_freq: 1
-continue_train: true
+continue_train: false
 
-# ==== Display ====
 display_id: -1
 
-# ==== PSS_DIFF Settings ====
 PSS:
-  path: None
+  path: null
   image_size: 224
   model:
     type: "simple"
@@ -71,8 +65,8 @@ PSS:
     eps: 0.00000001
     grad_clip: 1.0
 
-# ==== Logging / Output ====
-# If you want to redirect stdout/stderr to a log file like in your bash command,
-# do that in your shell script, not in YAML.
-# train:
-# screen -dmS training_session bash -c 'python pss_train.py --config train_configs/t1_pair_train_pss.yaml > /PATH/TO/LOGS/t1_pair_pss.log 2>&1'
+sgp_weights: "./weights/clip_1.pth"
+lsc_weights: "./weights/unet_weights_rotate.pth"
+LSC_mask: 0.2
+LSC_patch: 24
+wdb_disabled: true

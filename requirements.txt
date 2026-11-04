@@ -19,3 +19,5 @@ torchshow
 monai-weekly[nibabel]
 antspyx
 git+https://github.com/facebookresearch/segment-anything.git
+PyYAML
+scipy
