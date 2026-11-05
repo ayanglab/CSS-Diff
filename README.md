@@ -70,7 +70,10 @@ and `test_B` beneath your data root. A is LF, B is HF. The aligned loader pairs
 sorted numeric suffixes (e.g. `low_field_0.png`, `high_field_0.png`); use equal counts
 and verified correspondence. No raw patient data is supplied.
 
-Obtain the required SGP/LSC weights as described in [checkpoints](docs/CHECKPOINTS.md).
+Download SGP, LSC and G_A/G_B from the
+[evaluation checkpoint release](https://github.com/ayanglab/CSS-Diff/releases/tag/weights-20261105).
+Verify `SHA256SUMS` and follow the placement/format instructions in
+[checkpoints](docs/CHECKPOINTS.md). These files are not yet confirmed as the paper-table checkpoints.
 Edit the YAML paths or pass CLI overrides. Missing weights fail explicitly.
 
 ### Single training run

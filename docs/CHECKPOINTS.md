@@ -28,9 +28,10 @@ The `PSS.path` template field is not a checkpoint-loading option.
 Author storage contained the four files recorded in `checkpoint_validation.json`.
 They all loaded strictly on CPU with the published architectures. These checks
 establish architecture compatibility, not which files generated the paper tables.
-Their originating run, data split, distribution permission and paper association
-have not been established. No public download release is asserted here. Contact
-the repository authors for these files; do not substitute unrelated weights.
+Their originating run, data split and paper association have not been established. The authors have authorized publication of these files in the
+[evaluation checkpoint prerelease](https://github.com/ayanglab/CSS-Diff/releases/tag/weights-20261105).
+Download the four weights and `SHA256SUMS`, then run `sha256sum -c SHA256SUMS`
+in the download directory. Do not substitute unrelated weights.
 
 A local SGP+LSC notebook and server code copies were located, but no independently
 validated, portable pretraining pipeline is included in this repair.
